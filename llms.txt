@@ -1,0 +1,62 @@
+# Open DS MCP Server
+
+> Let Claude build with the WPP Open Design System. A local MCP server for Claude Desktop and Claude Code: it reads the Open DS Storybook, checks each page and the code Claude writes against the release you use, and brings step-by-step workflows for building, reviewing and upgrading Open DS apps and for mocking them up in Claude Design. A Claude Desktop extension and Claude Code server for macOS, version 0.6.3.
+
+## Install (agents)
+
+Continue only if `uname -s` prints `Darwin` and the user has Claude Desktop (`/Applications/Claude.app`) or Claude Code (`claude` on the PATH, with Node.js 20 or later). Otherwise tell the user what it needs.
+
+Run the installer with this one command. It downloads the extension, checks its SHA-256 (nothing changes before the check passes), opens Claude Desktop's install dialog and adds the server to Claude Code as `open-ds`. With no terminal it never prompts and answers no to every question: it doesn't replace an `open-ds` server Claude Code already has. It exits non-zero, with the reason on stderr, if anything fails.
+
+```bash
+curl -fsSL https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh | OPEN_DS_INSTALL_TTY=/dev/null bash
+```
+
+Then tell the user to click Install in the dialog Claude Desktop opened, and to start a new chat. The first question about Open DS opens a WPP sign-in in their browser; they finish it and ask again.
+
+### Updates
+
+The extension keeps itself up to date. Once a day it checks this site for a newer version, and when there is one Claude shows the user an update card in Claude Desktop. Update now downloads the new version, checks its SHA-256 and opens Claude Desktop's install dialog; it is installed only when the user clicks Install there. Not now hides that version for a week. You can't click these for the user, and nothing installs until they do. To update straight away, run the same install command again (the user still clicks Install). The Claude Code copy updates only when the install command runs again.
+
+### Verify
+
+Run the installer again with `--status` (after `bash -s --`). It prints the Claude Desktop extension's version (once the user has clicked Install), the Claude Code entry and whether the WPP sign-in is saved (it is kept in the macOS Keychain) and until when.
+
+## Workflows
+
+For whole jobs, the server brings step-by-step workflows. Claude loads the right one when you ask for the job; you can also start one yourself, in Claude Code as `/mcp__open-ds__<name>` and in Claude Desktop from the **+** menu.
+
+| Workflow | What it does |
+| --- | --- |
+| `build-ui` | Builds or changes a React screen, form or component with Open DS, at the release your project pins, and checks it before finishing |
+| `review` | Reviews how a project, some files or a Claude Design canvas uses Open DS, and reports each problem with its fix |
+| `upgrade` | Moves a project to another release: what changes, what breaks in your code before you install, then the upgrade, the fixes and the checks |
+| `mock` | Mocks up screens in Claude Design with the real components of a kit (a Claude Design design system built from Open DS), keeping to the kit's release |
+| `sync-kit` | Brings such a kit up to a new release through the kit's own build, and publishes only when you say so |
+
+`mock` and `sync-kit` work with your kit. Save it once ("Use https://claude.ai/artifact/… as my Open DS kit") and both use it from then on, in every session and both apps; without one saved, Claude tells you once about the team's kit, WPP Open x Unified Kit (built from Open DS 4.4.0, with Unified Activation's page templates and patterns), and offers to save it, with its release and pin; ask Claude "where's the Open DS kit?" any time. If its link doesn't open for you, ask Jamie Mills for access. Claude also saves the release the kit is built from. If your kit has to stay on a release, for example because it mirrors an app that pins one, say so ("my kit is pinned to the release the app uses"): Claude then never suggests moving it to a newer release, and `sync-kit` moves it only when the app does.
+
+## Tools
+
+| Tool | What it gives |
+| --- | --- |
+| `open_ds_search` | Full-text search over every component page and guide, plus element names in the package |
+| `open_ds_list_components` | Components by category with tag and React name; icons and sub-parts on request |
+| `open_ds_get_component` | One component: usage for your framework (React by default), properties, events, methods, slots, CSS parts and custom properties, changes in your release, stories |
+| `open_ds_get_story` | A story's source code (lit-html with web components) and its link |
+| `open_ds_list_guides` | Getting started, theming, migration, release notes and the other pages |
+| `open_ds_read_doc` | Any docs page as Markdown |
+| `open_ds_status` | Sign-in state, what the Storybook documents, your release and the latest, and the React install command |
+| `open_ds_set_version` | Choose the release to use (`4.5.0`, or `latest`); kept for every session and both apps |
+| `open_ds_resources` | The developer docs, the npm packages, the GitHub repositories with their git remotes and clone commands, and the Figma libraries of any release (or every release) |
+| `open_ds_check` | Checks code (files, folders, or source such as a Claude Design artboard) against a release's API, and lists each problem at its line; `from` adds colours of an older release's theme |
+| `open_ds_compare` | What changed between two releases, and the release notes in between |
+| `open_ds_tokens` | A release's theme tokens, spacing steps and font, and the token for a colour |
+| `open_ds_workflow` | Loads a workflow (above) for Claude to follow |
+| `open_ds_set_kit` | Saves your kit's link (or forgets it, with `none`) for `mock` and `sync-kit`; kept for every session and both apps |
+
+## Links
+
+- [Landing page](https://wpp-jamie-mills.github.io/open-ds-mcp-site/): install guides for people and agents
+- [Summary](https://wpp-jamie-mills.github.io/open-ds-mcp-site/summary.md): this project as one markdown page
+- [Installer](https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh): the script the install command runs

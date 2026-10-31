@@ -1,0 +1,1573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Open DS MCP Server: the WPP Open Design System for Claude</title>
+    <meta name="description" content="Let Claude build with the WPP Open Design System. A local MCP server for Claude Desktop and Claude Code: it reads the Open DS Storybook, checks each page and the code Claude writes against the release you use, and brings step-by-step workflows for building, reviewing and upgrading Open DS apps and for mocking them up in Claude Design." />
+    <meta property="og:type" content="website" />
+    <meta name="robots" content="noindex" />
+    <meta property="og:url" content="https://wpp-jamie-mills.github.io/open-ds-mcp-site/" />
+    <meta property="og:title" content="Open DS MCP Server: the WPP Open Design System for Claude" />
+    <meta property="og:description" content="Let Claude build with the WPP Open Design System. A local MCP server for Claude Desktop and Claude Code: it reads the Open DS Storybook, checks each page and the code Claude writes against the release you use, and brings step-by-step workflows for building, reviewing and upgrading Open DS apps and for mocking them up in Claude Design." />
+    <meta property="og:image" content="https://wpp-jamie-mills.github.io/open-ds-mcp-site/assets/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="site-build" content="9585bb6d4004f2adc9c8de5bede47f73b59d4f77" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%230b1020%27%2F%3E%3Crect%20x%3D%275%27%20y%3D%276%27%20width%3D%2722%27%20height%3D%2710%27%20rx%3D%275%27%20fill%3D%27none%27%20stroke%3D%27%23f2f2f2%27%20stroke-width%3D%272.2%27%2F%3E%3Crect%20x%3D%275%27%20y%3D%2720%27%20width%3D%2713%27%20height%3D%276.5%27%20rx%3D%273.25%27%20fill%3D%27none%27%20stroke%3D%27%23f2f2f2%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2723.75%27%20cy%3D%2723.25%27%20r%3D%273.25%27%20fill%3D%27%23ffffff%27%20stroke%3D%27%233b7bea%27%20stroke-width%3D%272%27%2F%3E%3C%2Fsvg%3E" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <link rel="alternate" type="text/markdown" href="llms.txt" />
+    <link
+      rel="preload"
+      href="fonts/InstrumentSerif-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="fonts/Satoshi-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <style>
+      @font-face {
+        font-family: "Instrument Serif";
+        src: url("fonts/InstrumentSerif-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Satoshi";
+        src: url("fonts/Satoshi-Variable.woff2") format("woff2");
+        font-weight: 300 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("fonts/IBMPlexMono-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Tokens: shadcn/ui semantic names. Dark is the primary direction; light follows the system setting. */
+      :root {
+        color-scheme: dark;
+        --radius: 0.625rem;
+        --background: oklch(0.12 0.003 260);
+        --foreground: oklch(0.955 0.005 250);
+        --card: oklch(0.165 0.006 260);
+        --card-foreground: oklch(0.955 0.005 250);
+        --popover: oklch(0.18 0.006 260);
+        --popover-foreground: oklch(0.955 0.005 250);
+        --primary: oklch(0.955 0.004 90);
+        --primary-foreground: oklch(0.17 0.004 260);
+        --secondary: oklch(0.22 0.007 260);
+        --secondary-foreground: oklch(0.94 0.005 250);
+        --muted: oklch(0.22 0.007 260);
+        --muted-foreground: oklch(0.71 0.012 250);
+        --accent: oklch(0.24 0.025 255);
+        --accent-foreground: oklch(0.82 0.11 255);
+        --border: oklch(0.9 0.01 250 / 0.14);
+        --input: oklch(0.9 0.01 250 / 0.2);
+        --ring: oklch(0.72 0.12 255);
+        --success: oklch(0.77 0.14 155);
+        --success-foreground: oklch(0.16 0.04 155);
+        --code: oklch(0.105 0.004 260);
+        --code-foreground: oklch(0.89 0.009 250);
+        --code-muted: oklch(0.7 0.012 250);
+        --code-border: oklch(0.9 0.01 250 / 0.12);
+        --highlight: oklch(1 0 0 / 0.035);
+        --sheen: oklch(1 0 0 / 0.025);
+        --shadow-raised: 0 24px 48px -24px oklch(0 0 0 / 0.7);
+
+        --font-display: "Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+        --font-sans:
+          "Satoshi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --radius-sm: calc(var(--radius) * 0.6);
+        --radius-md: calc(var(--radius) * 0.8);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) * 1.4);
+        --radius-2xl: calc(var(--radius) * 1.8);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --rail: 78rem;
+        --gutter: clamp(1rem, 0.6rem + 1.8vw, 2rem);
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          color-scheme: light;
+          --background: oklch(0.965 0.004 90);
+          --foreground: oklch(0.17 0.004 260);
+          --card: oklch(0.995 0.002 90);
+          --card-foreground: oklch(0.17 0.004 260);
+          --popover: oklch(0.995 0.002 90);
+          --popover-foreground: oklch(0.17 0.004 260);
+          --primary: oklch(0.17 0.004 260);
+          --primary-foreground: oklch(0.975 0.003 90);
+          --secondary: oklch(0.925 0.004 100);
+          --secondary-foreground: oklch(0.22 0.004 260);
+          --muted: oklch(0.925 0.004 100);
+          --muted-foreground: oklch(0.45 0.01 255);
+          --accent: oklch(0.925 0.018 255);
+          --accent-foreground: oklch(0.34 0.14 255);
+          --border: oklch(0.84 0.006 255 / 0.75);
+          --input: oklch(0.84 0.006 255 / 0.9);
+          --ring: oklch(0.49 0.17 255);
+          --success: oklch(0.49 0.13 155);
+          --success-foreground: oklch(0.98 0.015 150);
+          --code: oklch(0.13 0.006 260);
+          --code-foreground: oklch(0.9 0.008 250);
+          --code-muted: oklch(0.72 0.012 250);
+          --code-border: oklch(0.13 0.006 260);
+          --highlight: oklch(1 0 0 / 0.6);
+          --sheen: transparent;
+          --shadow-raised: 0 24px 48px -28px oklch(0.2 0.01 260 / 0.28);
+        }
+      }
+
+      /* Base */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 1.5rem;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font: 400 1rem/1.65 var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      :focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+      }
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-decoration-color: var(--muted-foreground);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.2em;
+        transition: text-decoration-color 140ms var(--ease);
+      }
+      a:hover {
+        text-decoration-color: currentColor;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      h2 {
+        font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+      }
+      h3 {
+        font-size: 1.1875rem;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0 0 1rem;
+        text-wrap: pretty;
+      }
+      ul,
+      ol {
+        margin: 0 0 1rem;
+        padding-left: 1.35rem;
+      }
+      li {
+        margin: 0.45rem 0;
+        padding-left: 0.2rem;
+      }
+      ol > li::marker {
+        font: 400 0.8125rem var(--font-mono);
+        color: var(--muted-foreground);
+      }
+      ul > li::marker {
+        color: var(--muted-foreground);
+      }
+      strong {
+        font-weight: 600;
+      }
+      code {
+        font: 400 0.875em var(--font-mono);
+        background: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.06em 0.36em;
+        overflow-wrap: anywhere;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      .skip {
+        position: absolute;
+        left: var(--gutter);
+        top: 0.75rem;
+        z-index: 10;
+        padding: 0.65rem 1rem;
+        border-radius: var(--radius-md);
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font-weight: 600;
+        text-decoration: none;
+        transform: translateY(-200%);
+      }
+      .skip:focus {
+        transform: none;
+      }
+      .rail {
+        max-width: var(--rail);
+        margin: 0 auto;
+        padding: 0 var(--gutter);
+      }
+      .kicker {
+        margin: 0 0 0.85rem;
+        font: 500 0.8125rem/1.4 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .lede {
+        font-size: 1.0625rem;
+        color: var(--muted-foreground);
+        max-width: 62ch;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.75rem;
+        padding: 0 1.25rem;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        font: 600 0.9375rem/1 var(--font-sans);
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+          background-color 140ms var(--ease),
+          border-color 140ms var(--ease),
+          transform 140ms var(--ease);
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: none;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: inset 0 1px 0 var(--highlight);
+      }
+      .btn-primary:hover {
+        background: color-mix(in oklch, var(--primary) 88%, var(--background));
+      }
+      .btn-outline {
+        border-color: var(--input);
+        color: var(--foreground);
+      }
+      .btn-outline:hover {
+        background: var(--secondary);
+      }
+
+      /* Header */
+      .site-header {
+        border-bottom: 1px solid var(--border);
+      }
+      .site-header .bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 4rem;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-height: 2.75rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        text-decoration: none;
+      }
+      /* The mark (BRAND_MARK, from scripts/mark.json): monochrome, its accent in the selection colour. */
+      .mark {
+        flex: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        overflow: visible;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .nav-links li {
+        margin: 0;
+        padding: 0;
+      }
+      .nav-links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--muted-foreground);
+        text-decoration: none;
+        transition:
+          color 140ms var(--ease),
+          background-color 140ms var(--ease);
+      }
+      .nav-links a:hover {
+        color: var(--foreground);
+        background: var(--secondary);
+      }
+      .menu {
+        display: none;
+        position: relative;
+      }
+      .menu summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 2.75rem;
+        padding: 0 0.9rem;
+        border: 1px solid var(--input);
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        list-style: none;
+      }
+      .menu summary::-webkit-details-marker {
+        display: none;
+      }
+      .menu summary::before {
+        content: "";
+        width: 14px;
+        height: 9px;
+        border-block: 1.5px solid currentColor;
+        background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat;
+      }
+      .menu[open] summary {
+        background: var(--secondary);
+      }
+      .menu .nav-links {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.5rem);
+        z-index: 5;
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 13rem;
+        padding: 0.375rem;
+        background: var(--popover);
+        color: var(--popover-foreground);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-raised);
+      }
+      .menu .nav-links a {
+        width: 100%;
+        min-height: 2.75rem;
+        color: var(--popover-foreground);
+      }
+      @media (max-width: 760px) {
+        .site-header nav.desktop {
+          display: none;
+        }
+        .menu {
+          display: block;
+        }
+      }
+
+      /* Hero */
+      .hero {
+        display: grid;
+        align-content: center;
+        min-height: min(calc(86svh - 4rem), 52rem);
+        padding-block: clamp(3.5rem, 2rem + 6vw, 8rem);
+      }
+      .hero-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        gap: clamp(2.5rem, 5vw, 5rem);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 1.5rem;
+        padding: 0.3rem 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--card);
+        font: 500 0.8125rem/1.3 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .hero h1 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: clamp(3.25rem, 2rem + 3.7vw, 5.25rem);
+        line-height: 0.98;
+        letter-spacing: -0.022em;
+        margin-bottom: 1.5rem;
+      }
+      .hero .lede {
+        font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+        max-width: 40ch;
+        margin-bottom: 2rem;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 0;
+        margin: 0;
+        font: 400 0.8125rem var(--font-mono);
+        color: var(--muted-foreground);
+      }
+      .meta span + span::before {
+        content: "/";
+        margin: 0 0.75rem;
+        opacity: 0.5;
+      }
+
+      /* Hero object: a frame being laid out on the canvas, one layer selected. */
+      .canvas {
+        position: relative;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-2xl);
+        background:
+          radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 1.5px) 0 0 / 18px 18px,
+          linear-gradient(180deg, var(--sheen), transparent 35%),
+          var(--card);
+        box-shadow:
+          inset 0 1px 0 var(--highlight),
+          var(--shadow-raised);
+        overflow: hidden;
+      }
+      .canvas svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .f-frame {
+        fill: var(--background);
+        stroke: var(--border);
+      }
+      .f-strong {
+        fill: var(--foreground);
+        opacity: 0.85;
+      }
+      .f-surface {
+        fill: var(--secondary);
+      }
+      .f-faint {
+        fill: var(--muted-foreground);
+        opacity: 0.38;
+      }
+      .f-select {
+        fill: none;
+        stroke: var(--ring);
+        stroke-width: 1.5;
+      }
+      .f-handle {
+        fill: var(--background);
+        stroke: var(--ring);
+        stroke-width: 1.5;
+      }
+      .f-cursor {
+        fill: var(--foreground);
+        stroke: var(--background);
+        stroke-width: 1.5;
+        stroke-linejoin: round;
+      }
+
+      /* Sections */
+      .section {
+        padding-block: clamp(4.5rem, 3rem + 5vw, 8rem);
+      }
+      .section > .rail > .head {
+        margin-bottom: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+      }
+      .section .head .lede {
+        margin: 1rem 0 0;
+      }
+      .rule {
+        border-top: 1px solid var(--border);
+      }
+      .dense {
+        padding-block: clamp(4rem, 3rem + 3vw, 6rem);
+      }
+
+      /* Cards */
+      .card {
+        min-width: 0;
+        padding: clamp(1.25rem, 0.9rem + 1.4vw, 2.25rem);
+        background: linear-gradient(180deg, var(--sheen), transparent 40%), var(--card);
+        color: var(--card-foreground);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+      }
+      .card > :last-child,
+      .card > div > :last-child {
+        margin-bottom: 0;
+      }
+      .card h3 {
+        margin-bottom: 0.65rem;
+      }
+      .card .muted {
+        color: var(--muted-foreground);
+      }
+      .label {
+        margin: 0 0 0.75rem;
+        font: 500 0.8125rem var(--font-sans);
+        color: var(--muted-foreground);
+      }
+
+      /* Install */
+      .install-stack {
+        display: grid;
+        gap: 1.25rem;
+      }
+      .people {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0 clamp(1.5rem, 1rem + 3vw, 3.5rem);
+        padding: clamp(1.25rem, 0.75rem + 2.4vw, 3rem);
+      }
+      .people .run {
+        grid-column: 1 / -1;
+      }
+      .people .run .codebox {
+        margin-bottom: 1.75rem;
+      }
+      .people .then {
+        padding-left: clamp(1.5rem, 1rem + 2vw, 3rem);
+        border-left: 1px solid var(--border);
+      }
+      .people .then ol > li {
+        margin-bottom: 0.85rem;
+      }
+      .agents {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+        gap: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+      }
+      .agents-body {
+        max-width: 72ch;
+      }
+
+      /* Code boxes (markup from codeBox() in build-site.mjs) */
+      .codebox {
+        margin: 0 0 1.25rem;
+        background: var(--code);
+        color: var(--code-foreground);
+        border: 1px solid var(--code-border);
+        border-radius: var(--radius-lg);
+        box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+        overflow: hidden;
+      }
+      .codebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.375rem 0.375rem 0.375rem 1rem;
+        border-bottom: 1px solid oklch(1 0 0 / 0.08);
+        font: 500 0.75rem var(--font-sans);
+        color: var(--code-muted);
+      }
+      .codebox pre {
+        margin: 0;
+        padding: 0.9rem 1rem 1rem;
+        font: 400 0.8125rem/1.7 var(--font-mono);
+        /* Keep commands on one line (scroll if needed) so a URL is never broken across lines. */
+        white-space: pre;
+        overflow-x: auto;
+        scrollbar-color: oklch(1 0 0 / 0.2) transparent;
+      }
+      .codebox pre:focus-visible {
+        outline-offset: -2px;
+      }
+      .codebox pre code {
+        font: inherit;
+        background: none;
+        border: 0;
+        padding: 0;
+        color: inherit;
+      }
+      .copy {
+        position: relative;
+        flex: none;
+        min-width: 4.75rem;
+        min-height: 2rem;
+        padding: 0 0.85rem;
+        font: 600 0.8125rem var(--font-sans);
+        color: var(--code-foreground);
+        background: oklch(1 0 0 / 0.06);
+        border: 1px solid oklch(1 0 0 / 0.14);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition:
+          background-color 140ms var(--ease),
+          border-color 140ms var(--ease),
+          color 140ms var(--ease);
+      }
+      /* A 44px tall target around the compact button. */
+      .copy::after {
+        content: "";
+        position: absolute;
+        inset: -6px -4px;
+      }
+      .copy:hover {
+        background: oklch(1 0 0 / 0.11);
+        border-color: oklch(1 0 0 / 0.24);
+      }
+      .copy.done {
+        background: var(--success);
+        border-color: var(--success);
+        color: var(--success-foreground);
+      }
+
+      /* Why use it: one large card, then varied spans */
+      .bento {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+      .bento .card {
+        display: flex;
+        flex-direction: column;
+      }
+      .bento .card p {
+        color: var(--muted-foreground);
+      }
+      .b-a {
+        grid-column: span 7;
+        grid-row: span 2;
+      }
+      .b-a h3 {
+        font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+        max-width: 18ch;
+      }
+      .b-b,
+      .b-c,
+      .b-d {
+        grid-column: span 5;
+      }
+      .b-e {
+        grid-column: span 7;
+      }
+      .stat {
+        margin: auto 0 0;
+        padding-top: 1.25rem;
+        font: 400 0.8125rem var(--font-mono);
+        color: var(--muted-foreground);
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0.5rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .chips li {
+        margin: 0;
+        padding: 0.3rem 0.6rem;
+        font: 400 0.8125rem var(--font-mono);
+        background: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+      }
+      .b-a .chips {
+        margin-top: auto;
+        padding-top: 1.25rem;
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        margin: auto 0 0;
+        padding: 1.25rem 0 0;
+        list-style: none;
+        border-top: 1px solid var(--border);
+      }
+      .facts li {
+        margin: 0;
+        padding: 0;
+        font-size: 0.875rem;
+        color: var(--muted-foreground);
+      }
+      .facts code {
+        display: block;
+        width: fit-content;
+        margin-bottom: 0.3rem;
+        color: var(--foreground);
+      }
+
+      /* What you can do */
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: clamp(2rem, 1rem + 4vw, 5rem);
+        align-items: start;
+      }
+      .features-copy h2 {
+        margin-bottom: 2rem;
+      }
+      .features-body > p {
+        max-width: 60ch;
+        padding-left: 1.25rem;
+        border-left: 1px solid var(--border);
+      }
+      .features-body > p strong:first-child {
+        font-size: 1.0625rem;
+      }
+      .notes {
+        color: var(--muted-foreground);
+        font-size: 0.9375rem;
+      }
+
+      /* Reference sections: a heading column beside the content */
+      .docs {
+        display: grid;
+        grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+        gap: clamp(1.5rem, 1rem + 4vw, 5rem);
+        align-items: start;
+      }
+      .docs .head {
+        position: sticky;
+        top: 1.5rem;
+      }
+      .docs .head .lede {
+        margin: 1rem 0 0;
+        font-size: 1rem;
+      }
+      .docs-body {
+        max-width: 68ch;
+      }
+      .docs-body > ol > li,
+      .docs-body > ul > li {
+        margin-bottom: 0.85rem;
+      }
+      .rows > ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .rows li {
+        margin: 0;
+        padding: 1.1rem 0;
+        border-top: 1px solid var(--border);
+      }
+      .rows li:last-child {
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* Tools */
+      .tool-group + .tool-group {
+        margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+      }
+      .tool-group h3 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .count {
+        font: 400 0.8125rem var(--font-mono);
+        color: var(--muted-foreground);
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--card);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9375rem;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      th {
+        background: var(--muted);
+        font: 500 0.8125rem var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      td {
+        color: var(--muted-foreground);
+      }
+      td:first-child {
+        width: 1%;
+        white-space: nowrap;
+        color: var(--foreground);
+      }
+      td:first-child code {
+        background: none;
+        border: 0;
+        padding: 0;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+      }
+      td code {
+        color: var(--foreground);
+      }
+
+      /* Closing call to action */
+      .cta {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        align-items: end;
+        gap: 0 clamp(1.5rem, 1rem + 4vw, 5rem);
+        padding: clamp(1.5rem, 1rem + 3vw, 4rem);
+        border-radius: var(--radius-2xl);
+        box-shadow: inset 0 1px 0 var(--highlight);
+      }
+      .cta h2 {
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.75rem);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+      }
+      .cta .codebox {
+        grid-column: 1 / -1;
+        margin: clamp(1.5rem, 1rem + 1.5vw, 2.5rem) 0 0;
+      }
+      .cta h2 + p,
+      .cta-note {
+        margin: 0;
+      }
+
+      footer {
+        padding-block: 3rem;
+        font-size: 0.875rem;
+        color: var(--muted-foreground);
+      }
+      footer .rail {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem 2rem;
+      }
+      footer p {
+        margin: 0;
+      }
+      footer .links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+        margin-left: 1.25rem;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+      }
+
+      /* README extras: subheadings, quotes and emphasis inside rendered sections */
+      .docs-body h3,
+      .docs-body h4,
+      .features-body h3 {
+        margin: 2rem 0 0.75rem;
+      }
+      .docs-body > h3:first-child,
+      .docs-body > h4:first-child {
+        margin-top: 0;
+      }
+      h4 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+      blockquote {
+        margin: 0 0 1rem;
+        padding: 0.85rem 1rem;
+        border-left: 2px solid var(--input);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        background: var(--muted);
+        color: var(--muted-foreground);
+      }
+      blockquote > :last-child {
+        margin-bottom: 0;
+      }
+      .docs-body .codebox {
+        margin-block: 0.5rem 1.25rem;
+      }
+
+      /* Entrance: the hero copy rises in, then the canvas draws itself. */
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+      @keyframes appear {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+      }
+      @keyframes glide {
+        from {
+          opacity: 0;
+          transform: translate(14px, 12px);
+        }
+      }
+      .hero-copy > * {
+        animation: rise 520ms var(--ease) both;
+      }
+      .hero-copy > :nth-child(2) {
+        animation-delay: 60ms;
+      }
+      .hero-copy > :nth-child(3) {
+        animation-delay: 120ms;
+      }
+      .hero-copy > :nth-child(4) {
+        animation-delay: 180ms;
+      }
+      .hero-copy > :nth-child(5) {
+        animation-delay: 240ms;
+      }
+      .canvas {
+        animation: rise 520ms var(--ease) 120ms both;
+      }
+      .draw > * {
+        animation: appear 420ms var(--ease) both;
+        transform-box: fill-box;
+      }
+      .draw > :nth-child(1) {
+        animation-delay: 300ms;
+      }
+      .draw > :nth-child(2) {
+        animation-delay: 370ms;
+      }
+      .draw > :nth-child(3) {
+        animation-delay: 440ms;
+      }
+      .draw > :nth-child(4) {
+        animation-delay: 510ms;
+      }
+      .draw > :nth-child(5) {
+        animation-delay: 580ms;
+      }
+      .draw > :nth-child(6) {
+        animation-delay: 650ms;
+      }
+      .draw > :nth-child(7) {
+        animation-delay: 720ms;
+      }
+      .draw > :nth-child(8) {
+        animation: glide 520ms var(--ease) 820ms both;
+      }
+
+      /* Layout breakpoints */
+      @media (max-width: 1080px) {
+        .agents {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0.5rem;
+        }
+        .facts {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      @media (max-width: 900px) {
+        .hero-grid,
+        .people,
+        .split,
+        .docs,
+        .cta {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .hero {
+          min-height: 0;
+        }
+        .canvas {
+          max-width: 34rem;
+        }
+        .people .then {
+          padding: 1.5rem 0 0;
+          border-left: 0;
+          border-top: 1px solid var(--border);
+        }
+        .bento > .card {
+          grid-column: 1 / -1;
+          grid-row: auto;
+        }
+        .docs .head {
+          position: static;
+        }
+        .cta-note {
+          margin-top: 0.75rem;
+        }
+      }
+      /* Small screens: each tool row becomes a record, its name above its description. */
+      @media (max-width: 640px) {
+        .table-wrap table,
+        .table-wrap tbody,
+        .table-wrap tr,
+        .table-wrap td {
+          display: block;
+          width: auto;
+        }
+        .table-wrap thead {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+        }
+        .table-wrap tr {
+          padding: 0.9rem 1rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .table-wrap tr:last-child {
+          border-bottom: 0;
+        }
+        .table-wrap td {
+          padding: 0;
+          border: 0;
+        }
+        .table-wrap td:first-child {
+          margin-bottom: 0.3rem;
+        }
+        td:first-child code {
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+      }
+      @media (max-width: 560px) {
+        footer .links a {
+          margin: 0 1.25rem 0 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          animation-delay: 0ms !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <div class="rail bar">
+        <a class="brand" href="#top"><svg class="mark" viewBox="4 4 24 24" aria-hidden="true" focusable="false"><rect x="5" y="6" width="22" height="10" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="5" y="20" width="13" height="6.5" rx="3.25" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="23.75" cy="23.25" r="3.25" fill="var(--background)" stroke="var(--ring)" stroke-width="2"/></svg>Open DS MCP Server</a>
+        <!-- The two nav lists must match each other and the sections below (keep 3 to 5 links). -->
+        <nav class="desktop" aria-label="Sections">
+          <ul class="nav-links">
+            <li><a href="#install">Install</a></li>
+            <li><a href="#workflows">Workflows</a></li>
+            <li><a href="#tools">Tools</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#troubleshooting">Help</a></li>
+          </ul>
+        </nav>
+        <details class="menu">
+          <summary>Menu</summary>
+          <nav aria-label="Sections">
+            <ul class="nav-links">
+              <li><a href="#install">Install</a></li>
+              <li><a href="#workflows">Workflows</a></li>
+              <li><a href="#tools">Tools</a></li>
+              <li><a href="#security">Security</a></li>
+              <li><a href="#troubleshooting">Help</a></li>
+            </ul>
+          </nav>
+        </details>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="rail hero-grid">
+          <div class="hero-copy">
+            <p class="badge">MCP server for Claude Desktop and Claude Code on macOS</p>
+            <h1 id="hero-title">Let Claude build with the WPP Open Design System.</h1>
+            <p class="lede">A local MCP server for Claude Desktop and Claude Code: it reads the Open DS Storybook, checks each page and the code Claude writes against the release you use, and brings step-by-step workflows for building, reviewing and upgrading Open DS apps and for mocking them up in Claude Design. One command installs it, and it offers its own updates.</p>
+            <div class="actions">
+              <a class="btn btn-primary" href="#install">Install</a>
+              <a class="btn btn-outline" href="#install-agents">Guide for AI agents</a>
+            </div>
+            <p class="meta">
+              <span>Version 0.6.3</span><span>14 tools</span><span>macOS</span>
+            </p>
+          </div>
+          <!--
+            Hero object: a component docs page in a window (component list, the component's preview and its
+            properties), with the primary button in the preview selected. Drawn only with the f-* classes (see
+            references/design-system.md); 8 children of .draw, the last (the cursor) glides in.
+          -->
+          <figure
+            class="canvas"
+            role="img"
+            aria-label="Illustration: a design-system docs page with a list of components, a preview of buttons and a field, and a table of properties; the primary button is selected"
+          >
+            <svg
+              viewBox="0 0 520 400"
+              width="520"
+              height="400"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <g class="draw">
+                <rect class="f-frame" x="70.5" y="54.5" width="379" height="290" rx="10" />
+                <g>
+                  <circle class="f-faint" cx="94" cy="78" r="4.5" />
+                  <circle class="f-faint" cx="110" cy="78" r="4.5" />
+                  <circle class="f-faint" cx="126" cy="78" r="4.5" />
+                  <rect class="f-faint" x="92" y="106" width="58" height="7" rx="3.5" />
+                  <rect class="f-strong" x="92" y="124" width="66" height="8" rx="4" />
+                  <rect class="f-faint" x="92" y="142" width="50" height="7" rx="3.5" />
+                  <rect class="f-faint" x="92" y="159" width="62" height="7" rx="3.5" />
+                  <rect class="f-faint" x="92" y="176" width="44" height="7" rx="3.5" />
+                  <rect class="f-faint" x="92" y="193" width="56" height="7" rx="3.5" />
+                  <rect class="f-faint" x="92" y="210" width="48" height="7" rx="3.5" />
+                </g>
+                <g>
+                  <rect class="f-strong" x="184" y="104" width="118" height="12" rx="3" />
+                  <rect class="f-faint" x="184" y="124" width="226" height="7" rx="3.5" />
+                </g>
+                <rect class="f-surface" x="184" y="144" width="244" height="84" rx="8" />
+                <g>
+                  <rect class="f-strong" x="204" y="173" width="74" height="26" rx="13" />
+                  <rect class="f-faint" x="290" y="173" width="62" height="26" rx="13" />
+                  <rect class="f-faint" x="364" y="181" width="44" height="10" rx="5" />
+                </g>
+                <g>
+                  <rect class="f-strong" x="184" y="250" width="54" height="7" rx="3.5" />
+                  <rect class="f-faint" x="250" y="250" width="96" height="7" rx="3.5" />
+                  <rect class="f-strong" x="184" y="272" width="42" height="7" rx="3.5" />
+                  <rect class="f-faint" x="250" y="272" width="132" height="7" rx="3.5" />
+                  <rect class="f-strong" x="184" y="294" width="62" height="7" rx="3.5" />
+                  <rect class="f-faint" x="250" y="294" width="78" height="7" rx="3.5" />
+                </g>
+                <g>
+                  <rect class="f-select" x="203" y="172" width="76" height="28" />
+                  <rect class="f-handle" x="199.5" y="168.5" width="7" height="7" />
+                  <rect class="f-handle" x="275.5" y="168.5" width="7" height="7" />
+                  <rect class="f-handle" x="199.5" y="196.5" width="7" height="7" />
+                  <rect class="f-handle" x="275.5" y="196.5" width="7" height="7" />
+                </g>
+                <path
+                  class="f-cursor"
+                  d="M284 205 l0 22 l5.5 -5 l4 9 l4 -1.8 l-4 -8.8 l7.5 -0.4 z"
+                />
+              </g>
+            </svg>
+          </figure>
+        </div>
+      </section>
+
+      <section id="install" class="section rule" aria-labelledby="install-title">
+        <div class="rail">
+          <div class="head">
+            <p class="kicker">Install</p>
+            <h2 id="install-title">One command, then a quick setup</h2>
+            <p class="lede">
+              The installer downloads the Claude Desktop extension, checks its SHA-256 before anything changes,
+              and opens Claude Desktop's install dialog. With Claude Code and Node.js 20 or later, it adds the same
+              server to Claude Code too.
+            </p>
+          </div>
+          <div class="install-stack">
+            <article class="card people" id="install-people" aria-labelledby="people-title">
+              <div class="run">
+                <h3 id="people-title">For people</h3>
+                <p class="muted">Open Terminal and run:</p>
+                <div class="codebox"><div class="codebar"><span>Terminal</span><button class="copy" type="button" aria-label="Copy install command">Copy</button></div><pre tabindex="0"><code>curl -fsSL https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh | bash</code></pre></div>
+              </div>
+              <p class="muted">
+                You need a Mac with Claude Desktop or Claude Code. You don't need git, npm or a token, or to install
+                anything for the WPP sign-in: it's built in, and keeps your sign-in in your macOS Keychain. After that it keeps itself up to date: Claude offers each new
+                version on an update card in the chat, and it is installed only when you click Update now and then
+                Install.              </p>
+                            <div class="then">
+                <p class="label">Then</p>
+                <ol><li>Click <strong>Install</strong> in the dialog Claude Desktop opens.</li><li>In a new chat, ask Claude something like &quot;Which Open DS component should I use for a date range?&quot;. The first time, it signs you in to the Storybook with your WPP session; while that session is valid this happens by itself, otherwise a WPP sign-in page opens in your browser: finish it, then ask again.</li></ol>
+              </div>
+                          </article>
+
+            <article class="card agents" id="install-agents" aria-labelledby="agents-title">
+              <div>
+                <h3 id="agents-title">For AI agents</h3>
+                <p class="muted">
+                  Use these steps if you are an AI agent installing this for a user.
+                </p>
+                <p class="muted">A plain-text version is in <a href="llms.txt">llms.txt</a>.</p>
+              </div>
+              <div class="agents-body">
+                <ol>
+                  <li>
+                    <strong>Check the machine.</strong> Continue only if <code>uname -s</code> prints
+                    <code>Darwin</code> and the user has Claude Desktop (<code>/Applications/Claude.app</code>) or
+                    Claude Code (<code>claude</code> on the PATH, with Node.js 20 or later). Otherwise tell the user
+                    what it needs.
+                  </li>
+                  <li>
+                    <strong>Run the installer</strong> with this one command. It downloads the extension, checks
+                    its SHA-256 (nothing changes before the check passes), opens Claude Desktop's install dialog and
+                    adds the server to Claude Code. With no terminal it never prompts and answers no to every
+                    question. It exits non-zero, with the reason on stderr, if anything fails.
+                  </li>
+                </ol>
+                <div class="codebox"><div class="codebar"><span>Terminal</span><button class="copy" type="button" aria-label="Copy install command for agents">Copy</button></div><pre tabindex="0"><code>curl -fsSL https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh | OPEN_DS_INSTALL_TTY=/dev/null bash</code></pre></div>
+                <ol start="3">
+                  <li>
+                    <strong>Verify.</strong> Run the installer again with <code>--status</code> (after
+                    <code>bash -s --</code>). It shows the Claude Desktop extension once the user has clicked
+                    Install, the Claude Code entry and whether the WPP sign-in is saved. The user clicks Install and
+                    finishes the sign-in in their browser; you can't do either for them.
+                  </li>
+                                    <li>
+                    <strong>Updates look after themselves.</strong> Once a day the extension checks for a new version
+                    and Claude shows the user an update card. Only the user can click Update now and then Install;
+                    to update straight away, run the install command again.
+                  </li>
+                                  </ol>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why use it: one large card, then varied spans. Written from the README's real benefits. -->
+      <section id="why" class="section rule" aria-labelledby="why-title">
+        <div class="rail">
+          <div class="head">
+            <p class="kicker">Why use it</p>
+            <h2 id="why-title">Answers from the design system, not from memory</h2>
+          </div>
+          <div class="bento">
+            <article class="card b-a">
+              <h3>Claude reads a component's own page before it writes a line of code.</h3>
+              <p>
+                Usage for React, properties with their types and defaults, events, slots and CSS parts come
+                straight from the Open DS Storybook. Claude is told to use only what is documented.
+              </p>
+              <ul class="chips" aria-label="Tools"><li>open_ds_search</li><li>open_ds_list_components</li><li>open_ds_get_component</li><li>open_ds_get_story</li><li>open_ds_list_guides</li><li>open_ds_read_doc</li><li>open_ds_status</li><li>open_ds_set_version</li><li>open_ds_resources</li><li>open_ds_check</li><li>open_ds_compare</li><li>open_ds_tokens</li><li>open_ds_workflow</li><li>open_ds_set_kit</li></ul>
+            </article>
+            <article class="card b-b">
+              <h3>Checked against your release</h3>
+              <p>
+                Each page, and the code Claude writes, is checked against the package types of the release you
+                use: a prop that doesn't exist, a value it doesn't take or an <code>onChange</code> that never
+                fires is caught before you run anything.
+              </p>
+            </article>
+            <article class="card b-c">
+              <h3>Search by what you need</h3>
+              <p>
+                Ask for a date range or a toast with an action: Claude searches every component page and guide,
+                then reads the one that fits.
+              </p>
+            </article>
+            <article class="card b-d">
+              <h3>Workflows for whole jobs</h3>
+              <p>
+                Build a screen, review a project, upgrade to a new release, or mock it up in Claude Design with
+                your kit: Claude follows a step-by-step workflow that knows where Open DS trips people up.
+              </p>
+            </article>
+            <article class="card b-e">
+              <h3>Signs in as you, and only reads</h3>
+              <p>
+                WPP's own sign-in opens in your browser. The token stays in your Mac's Keychain and goes only to
+                the Storybook; the only things the tools save are your choice of release and your kit's link.
+              </p>
+              <ul class="facts">
+                <li><code>SHA-256</code>Checked before anything is installed</li>
+                <li><code>24 h</code>How long a WPP sign-in lasts</li>
+                <li><code>--status</code>See what is installed</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section rule" aria-labelledby="features-title">
+        <div class="rail split">
+          <div class="features-copy">
+            <p class="kicker">Features</p>
+            <h2 id="features-title">What you can do</h2>
+            <div class="features-body"><ul><li><strong>Find the right component.</strong> Ask for what you need (&quot;a date range&quot;, &quot;a toast with an action&quot;) and Claude searches every component page and guide, then reads the one that fits.</li><li><strong>Write React with the real API.</strong> Each component comes with its React usage, properties with their types and defaults, events (as <code>onWpp…</code> props), methods, slots, CSS parts and custom properties. Claude is told to use only what is documented.</li><li><strong>See the examples.</strong> Any story&#39;s source from the Storybook, with a link to open it.</li><li><strong>Set up a project.</strong> The install command for your release, and the getting-started and theming guides.</li><li><strong>Stay on your release.</strong> Choose a release (&quot;use Open DS 4.5.0&quot;) and every answer follows it. Each page is checked against that release&#39;s package types, so a property the page doesn&#39;t document yet is flagged.</li><li><strong>Find the docs, code and Figma files.</strong> Ask for the developer docs, the npm packages, the repository or git remote of the web components or the React wrappers (with the clone command for your release), or the Figma libraries (Components, Foundations, Icons &amp; Images) of any release.</li><li><strong>Check code against a release.</strong> Claude checks the code it writes, or any file, folder or Claude Design artboard, against your release&#39;s real API without installing anything: components, wrappers and props that don&#39;t exist, values a prop doesn&#39;t take, deprecated props, React habits that don&#39;t work with these web components (<code>onChange</code>, <code>event.target.value</code>, string booleans, <code>aria-*</code> that never reaches the control), hard-coded colours that are theme tokens (and, when upgrading, colours of the old theme), invented <code>--wpp-*</code> variables, CSS that selects a component by tag name, fonts other than WPP, pages and artboards that get no bundle, theme variables or WPP font (reading the local stylesheets they link), and native elements Open DS has a component for. It says what it can&#39;t check, and never calls a run clean when it found no Open DS components.</li><li><strong>Compare releases.</strong> What changed between two releases: components and icons added and removed, props added, removed, retyped or deprecated, theme token changes, and the release notes to read.</li><li><strong>Use the theme.</strong> Every <code>--wpp-*</code> token of a release (colours, type styles, radii, shadows), the spacing steps, the font, and the token for any colour.</li></ul></div>
+          </div>
+          <div>
+            <div class="notes"><p>Once it&#39;s installed, ask Claude in any new chat:</p>
+<div class="codebox"><div class="codebar"><span>text</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre tabindex="0"><code>Which Open DS component should I use for a date range?
+Build a settings form with WppInput, WppSelect and WppButton.
+What events does WppSelect fire, and what is in event.detail?
+How do I install Open DS in my Vite app?
+Use Open DS 4.5.0.
+Review how this app uses Open DS.
+Upgrade this project to the latest Open DS release.
+What changed in Open DS between 4.4.0 and 4.6.0?
+Mock up a &quot;create campaign&quot; side modal in Claude Design with our kit.</code></pre></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tools" class="section dense rule" aria-labelledby="tools-title">
+        <div class="rail">
+          <div class="head">
+            <p class="kicker">Reference</p>
+            <h2 id="tools-title">Tools</h2>
+            <p class="lede">
+              14 tools, all read-only except the two that save your choice of release and kit. Claude picks
+              them for you; you ask in plain words.
+            </p>
+          </div>
+          <div class="tool-group">
+            <div class="table-wrap"><table><thead><tr><th>Tool</th><th>What it gives</th></tr></thead><tbody><tr><td><code>open_ds_search</code></td><td>Full-text search over every component page and guide, plus element names in the package</td></tr><tr><td><code>open_ds_list_components</code></td><td>Components by category with tag and React name; icons and sub-parts on request</td></tr><tr><td><code>open_ds_get_component</code></td><td>One component: usage for your framework (React by default), properties, events, methods, slots, CSS parts and custom properties, changes in your release, stories</td></tr><tr><td><code>open_ds_get_story</code></td><td>A story&#39;s source code (lit-html with web components) and its link</td></tr><tr><td><code>open_ds_list_guides</code></td><td>Getting started, theming, migration, release notes and the other pages</td></tr><tr><td><code>open_ds_read_doc</code></td><td>Any docs page as Markdown</td></tr><tr><td><code>open_ds_status</code></td><td>Sign-in state, what the Storybook documents, your release and the latest, and the React install command</td></tr><tr><td><code>open_ds_set_version</code></td><td>Choose the release to use (<code>4.5.0</code>, or <code>latest</code>); kept for every session and both apps</td></tr><tr><td><code>open_ds_resources</code></td><td>The developer docs, the npm packages, the GitHub repositories with their git remotes and clone commands, and the Figma libraries of any release (or every release)</td></tr><tr><td><code>open_ds_check</code></td><td>Checks code (files, folders, or source such as a Claude Design artboard) against a release&#39;s API, and lists each problem at its line; <code>from</code> adds colours of an older release&#39;s theme</td></tr><tr><td><code>open_ds_compare</code></td><td>What changed between two releases, and the release notes in between</td></tr><tr><td><code>open_ds_tokens</code></td><td>A release&#39;s theme tokens, spacing steps and font, and the token for a colour</td></tr><tr><td><code>open_ds_workflow</code></td><td>Loads a workflow (above) for Claude to follow</td></tr><tr><td><code>open_ds_set_kit</code></td><td>Saves your kit&#39;s link (or forgets it, with <code>none</code>) for <code>mock</code> and <code>sync-kit</code>; kept for every session and both apps</td></tr></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflows" class="section dense rule" aria-labelledby="workflows-title">
+        <div class="rail">
+          <div class="head">
+            <p class="kicker">Workflows</p>
+            <h2 id="workflows-title">Workflows</h2>
+            <p class="lede">
+              5 step-by-step guides. Claude loads the right one when you ask for the job; you can
+              start one yourself too.
+            </p>
+          </div>
+          <div class="tool-group">
+            <p>For whole jobs, the server brings step-by-step workflows. Claude loads the right one when you ask for the job; you can also start one yourself, in Claude Code as <code>/mcp__open-ds__&lt;name&gt;</code> and in Claude Desktop from the <strong>+</strong> menu.</p>
+<div class="table-wrap"><table><thead><tr><th>Workflow</th><th>What it does</th></tr></thead><tbody><tr><td><code>build-ui</code></td><td>Builds or changes a React screen, form or component with Open DS, at the release your project pins, and checks it before finishing</td></tr><tr><td><code>review</code></td><td>Reviews how a project, some files or a Claude Design canvas uses Open DS, and reports each problem with its fix</td></tr><tr><td><code>upgrade</code></td><td>Moves a project to another release: what changes, what breaks in your code before you install, then the upgrade, the fixes and the checks</td></tr><tr><td><code>mock</code></td><td>Mocks up screens in Claude Design with the real components of a kit (a Claude Design design system built from Open DS), keeping to the kit&#39;s release</td></tr><tr><td><code>sync-kit</code></td><td>Brings such a kit up to a new release through the kit&#39;s own build, and publishes only when you say so</td></tr></tbody></table></div>
+<p><code>mock</code> and <code>sync-kit</code> work with your kit. Save it once (&quot;Use <a href="https://claude.ai/artifact/…" target="_blank" rel="noopener noreferrer">https://claude.ai/artifact/…</a> as my Open DS kit&quot;) and both use it from then on, in every session and both apps; without one saved, Claude tells you once about the team&#39;s kit, WPP Open x Unified Kit (built from Open DS 4.4.0, with Unified Activation&#39;s page templates and patterns), and offers to save it, with its release and pin; ask Claude &quot;where&#39;s the Open DS kit?&quot; any time. If its link doesn&#39;t open for you, ask Jamie Mills for access. Claude also saves the release the kit is built from. If your kit has to stay on a release, for example because it mirrors an app that pins one, say so (&quot;my kit is pinned to the release the app uses&quot;): Claude then never suggests moving it to a newer release, and <code>sync-kit</code> moves it only when the app does.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="releases" class="section rule" aria-labelledby="releases-title">
+        <div class="rail docs">
+          <div class="head">
+            <p class="kicker">Releases</p>
+            <h2 id="releases-title">Choosing a release</h2>
+            <p class="lede">Follow the newest release, or keep to the one your app uses.</p>
+          </div>
+          <div class="docs-body"><p>By default it follows the newest release. To use another, ask Claude (&quot;use Open DS 4.5.0&quot;). The choice is saved on your Mac, so it lasts across sessions and applies in both Claude Desktop and Claude Code, until you choose another or <code>latest</code>. It changes the install command and the release each component page is checked against. The Storybook itself is one build and doesn&#39;t change; each release&#39;s notes stay readable (&quot;show the release notes for 4.4.0&quot;).</p>
+<p>In your React app, the release is the <code>#vX.Y.Z</code> at the end of both git URLs in <code>package.json</code>. Keep the two packages on the same tag.</p></div>
+        </div>
+      </section>
+
+      <section id="react" class="section rule" aria-labelledby="react-title">
+        <div class="rail docs">
+          <div class="head">
+            <p class="kicker">React</p>
+            <h2 id="react-title">Using Open DS in React</h2>
+            <p class="lede">Public git tags, no token, React 17 or 18 with a bundler.</p>
+          </div>
+          <div class="docs-body"><p>The packages are <code>@wppopen/components-library</code> (the web components) and <code>@wppopen/components-library-react</code> (the React wrappers). Since v3.6.0 they are released only as git tags on GitHub, not to any registry, so a plain <code>npm install @wppopen/components-library</code> doesn&#39;t find current releases, and no token is needed. The Storybook&#39;s &quot;Getting Started/Developers&quot; guide still shows an old private-registry <code>.npmrc</code> step; skip it. Ask Claude for the install command (it comes for your release), or:</p>
+<div class="codebox"><div class="codebar"><span>Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre tabindex="0"><code>npm install \
+  &quot;@wppopen/components-library@git+https://github.com/WPP-Public/wpp--os--platform-ui-kit.git#v4.6.0&quot; \
+  &quot;@wppopen/components-library-react@git+https://github.com/WPP-Public/wpp--os--platform-ui-kit-react.git#v4.6.0&quot;</code></pre></div>
+<p>The React bindings support React 17 and 18 (their peer range) and need a bundler such as Vite or webpack. Import the theme once:</p>
+<div class="codebox"><div class="codebar"><span>tsx</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre tabindex="0"><code>import &quot;@wppopen/components-library/dist/platform-ui-kit/wpp-theme.css&quot;;
+import &quot;@wppopen/components-library/dist/platform-ui-kit/global.css&quot;;
+import { WppButton } from &quot;@wppopen/components-library-react&quot;;</code></pre></div></div>
+        </div>
+      </section>
+
+      <section id="update" class="section rule" aria-labelledby="update-title">
+        <div class="rail docs">
+          <div class="head">
+            <p class="kicker">Updates</p>
+            <h2 id="update-title">Update and remove</h2>
+            <p class="lede">New versions come to you in the chat; nothing is installed until you click.</p>
+          </div>
+          <div class="docs-body rows"><ul><li><strong>Update now.</strong> Once a day the extension checks for a newer version. When there is one, Claude shows an update card: <strong>Update now</strong> downloads it, checks its SHA-256 and opens Claude Desktop&#39;s install dialog, where you click <strong>Install</strong>. Your settings are kept.</li><li><strong>Not now.</strong> Hides that version for a week; a newer one is offered as usual.</li><li><strong>Check any time.</strong> Ask Claude &quot;Check for updates to Open DS MCP Server&quot;.</li><li><strong>Turn the check off.</strong> Claude Desktop → Settings → Extensions → Open DS MCP Server → Check for updates.</li><li><strong>Claude Code.</strong> Its copy updates when you run the install command again.</li><li><strong>See what&#39;s installed.</strong> <code>curl -fsSL https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh | bash -s -- --status</code></li><li><strong>Remove.</strong> Add <code>--uninstall</code> instead of <code>--status</code>: it removes the Claude Code entry and the data folder (<code>~/.open-ds-mcp</code>: the saved extension, the cache and your chosen release). Remove the extension itself in Claude Desktop → Settings → Extensions.</li></ul></div>
+        </div>
+      </section>
+
+      <section id="security" class="section rule" aria-labelledby="security-title">
+        <div class="rail docs">
+          <div class="head">
+            <p class="kicker">Security</p>
+            <h2 id="security-title">Security and privacy</h2>
+            <p class="lede">What it reads, what it keeps, and where your sign-in goes.</p>
+          </div>
+          <div class="docs-body rows"><ul><li><strong>Read-only.</strong> Every tool reads. The two exceptions save a choice in <code>~/.open-ds-mcp/settings.json</code>: the release you choose, and the link of your kit.</li><li><strong>Your files.</strong> Only <code>open_ds_check</code> reads files on your Mac: the files and folders Claude passes it, and in folders only source files (<code>.tsx</code>, <code>.jsx</code>, <code>.ts</code>, <code>.js</code>, <code>.html</code>, <code>.css</code>), leaving out <code>node_modules</code> and build output. It never changes them, and nothing it reads leaves your Mac.</li><li><strong>Signs in as you.</strong> The Storybook (components.os.wpp.com) is behind Cloudflare Access. The server signs you in the way Cloudflare&#39;s own <code>cloudflared</code> does: WPP&#39;s sign-in opens in your browser, and Cloudflare hands the Storybook&#39;s token back sealed to a key made for that one sign-in, which only the server holds. Before starting, it checks that the Storybook&#39;s Cloudflare Access details are signed by WPP&#39;s Cloudflare Access domain. The token is kept in your macOS login Keychain (service <code>open-ds-mcp</code>), written and read through macOS&#39;s <code>security</code> tool so it never appears in a command line, and while the server runs, in memory. It is sent only to the Storybook, and never logged or shown to Claude. It lasts as long as your WPP session for the Storybook (up to 24 hours).</li><li><strong>What it fetches.</strong> Storybook files, with your sign-in, and public files from GitHub (the release list, and each release&#39;s component types, theme stylesheets and list of React wrappers), with no credentials. Asked for Figma libraries, it checks each file is there with a HEAD request to public-assets.os.wpp.com, also without credentials.</li><li><strong>What it keeps.</strong> A cache of those files in <code>~/.open-ds-mcp/cache</code>, readable only by you, and your chosen release. Once a day, the update check&#39;s result in <code>~/Library/Caches/open-ds-mcp</code>.</li><li><strong>The update check.</strong> It fetches <code>latest.version</code> from the address the installer downloads from; nothing about you is sent. Only Update now downloads the extension, and it is opened only if it matches the published SHA-256 and is this extension at that version.</li><li><strong>The installer.</strong> It checks the download&#39;s SHA-256 before changing anything, only asks questions in a terminal, and with no terminal answers no.</li></ul></div>
+        </div>
+      </section>
+
+      <section id="troubleshooting" class="section rule" aria-labelledby="troubleshooting-title">
+        <div class="rail docs">
+          <div class="head">
+            <p class="kicker">Help</p>
+            <h2 id="troubleshooting-title">Troubleshooting</h2>
+            <p class="lede">The messages you might see, and what to do about each.</p>
+          </div>
+          <div class="docs-body rows"><ul><li><strong>&quot;A WPP sign-in page has opened&quot;</strong>: finish it in your browser, then ask again. Sign-ins last up to 24 hours; while your browser is still signed in to WPP the page finishes by itself in a few seconds. If no page opened, the answer includes its address to open.</li><li><strong>&quot;Couldn&#39;t save the WPP sign-in in the macOS Keychain&quot;</strong>: unlock your login keychain (Keychain Access) and ask again; until then the sign-in lasts only until Claude restarts.</li><li><strong>Claude doesn&#39;t see the tools</strong>: start a new chat; chats opened before the install don&#39;t get them. In Claude Code, start a new session.</li><li><strong>&quot;Checksum mismatch — nothing was installed&quot;</strong>: a new release can take up to about 10 minutes to reach every server; run the command again.</li><li><strong>Claude Code already has an <code>open-ds</code> server</strong>: the installer asks before replacing it, and with no terminal leaves it alone. Remove it with <code>claude mcp remove --scope user open-ds</code>, then run the installer again.</li><li><strong>A page doesn&#39;t mention a property</strong>: the Storybook can lag the release. The component&#39;s answer lists what your release adds.</li><li><strong>&quot;has no React wrapper&quot;</strong>: a few elements (seven icons, such as <code>wpp-icon-play-filled</code>) are web components only in every release so far. The answer says how to use the element in React instead.</li></ul></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="cta-title">
+        <div class="rail">
+          <div class="card cta">
+            <div>
+              <h2 id="cta-title">One command to install. Updates come to you.</h2>
+              <p class="muted">No git, no npm, no token: Claude Desktop runs the extension itself.</p>
+            </div>
+            <p class="muted cta-note">
+              Installing for someone as an AI agent? Follow the
+              <a href="#install-agents">agent guide</a>.
+            </p>
+            <div class="codebox"><div class="codebar"><span>Terminal</span><button class="copy" type="button" aria-label="Copy install command">Copy</button></div><pre tabindex="0"><code>curl -fsSL https://wpp-jamie-mills.github.io/open-ds-mcp-site/install.sh | bash</code></pre></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="rule">
+      <div class="rail">
+        <p>Open DS MCP Server · generated from the project README for version 0.6.3.</p>
+        <p class="links"><a href="summary.md">summary.md</a><a href="llms.txt">llms.txt</a><a href="install.sh">install.sh</a></p>
+      </div>
+    </footer>
+
+    <div class="sr-only" role="status" id="copy-status"></div>
+    <script>
+      (function () {
+        var status = document.getElementById("copy-status");
+        function fallbackCopy(text) {
+          var area = document.createElement("textarea");
+          area.value = text;
+          area.setAttribute("readonly", "");
+          area.style.position = "fixed";
+          area.style.opacity = "0";
+          var previous = document.activeElement;
+          document.body.appendChild(area);
+          area.select();
+          var ok = false;
+          try {
+            ok = document.execCommand("copy");
+          } catch (e) {}
+          document.body.removeChild(area);
+          if (previous && previous.focus) previous.focus();
+          return ok;
+        }
+        function copyText(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text).then(
+              function () {
+                return true;
+              },
+              function () {
+                return fallbackCopy(text);
+              },
+            );
+          }
+          return Promise.resolve(fallbackCopy(text));
+        }
+        Array.prototype.forEach.call(document.querySelectorAll(".codebox .copy"), function (btn) {
+          var label = btn.textContent;
+          var aria = btn.getAttribute("aria-label");
+          var timer;
+          btn.addEventListener("click", function () {
+            var pre = btn.closest(".codebox").querySelector("pre");
+            copyText(pre.textContent.replace(/\n$/, "")).then(function (ok) {
+              clearTimeout(timer);
+              if (!ok) {
+                // Leave the command selected so the user can copy it with the keyboard.
+                var range = document.createRange();
+                range.selectNodeContents(pre);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+              }
+              var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+              btn.textContent = ok ? "Copied" : mac ? "Press ⌘C" : "Press Ctrl+C";
+              btn.classList.toggle("done", ok);
+              btn.setAttribute("aria-label", ok ? "Copied" : "Copy failed");
+              status.textContent = ok ? "Copied to clipboard" : "Copy failed";
+              timer = setTimeout(function () {
+                btn.textContent = label;
+                btn.classList.remove("done");
+                btn.setAttribute("aria-label", aria);
+                status.textContent = "";
+              }, 1500);
+            });
+          });
+        });
+
+        // The small-screen menu closes on Escape (returning focus to its button), on a link and on an outside click.
+        var menu = document.querySelector(".menu");
+        if (menu) {
+          var summary = menu.querySelector("summary");
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && menu.open) {
+              menu.open = false;
+              summary.focus();
+            }
+          });
+          menu.addEventListener("click", function (e) {
+            if (e.target.closest("a")) menu.open = false;
+          });
+          document.addEventListener("click", function (e) {
+            if (menu.open && !menu.contains(e.target)) menu.open = false;
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
